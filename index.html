@@ -26,21 +26,23 @@
             width: 50%; 
             height: 50%; 
             transform-origin: 100% 100%; 
-            left: 0; 
+            left: 50%; 
             top: 0; 
             display: flex; 
-            align-items: center; 
+            align-items: flex-end; 
             justify-content: center; 
-            font-size: 16px; 
+            font-size: 14px; 
             font-weight: bold; 
             text-align: center; 
-            padding-left: 20px;
+            padding-bottom: 10px;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
         }
         .wheel-segment span { 
-            transform: rotate(90deg); 
+            transform: rotate(0deg); 
             display: block;
             color: #fff;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            margin-bottom: 5px;
         }
         .center-circle { 
             position: absolute; 
@@ -143,13 +145,13 @@
         function createWheel() { 
             const wheel = document.getElementById('wheel'), 
                   numSegments = tarotCards.length, 
-                  anglePerSegment = 360/numSegments; 
+                  anglePerSegment = 360 / numSegments; 
             
             for (let i = 0; i < numSegments; i++) {
                 const segment = document.createElement('div'); 
                 segment.className = 'wheel-segment'; 
                 segment.style.backgroundColor = colors[i % colors.length]; 
-                segment.style.transform = `rotate(${i * anglePerSegment}deg)`; 
+                segment.style.transform = `translateX(-50%) rotate(${i * anglePerSegment}deg)`; 
                 segment.innerHTML = `<span>${i + 1}</span>`; 
                 wheel.appendChild(segment); 
             }
@@ -164,17 +166,17 @@
             document.getElementById('result').innerHTML = '<div class="label">Your card:</div><div class="card-name">...</div>'; 
             
             const numSegments = tarotCards.length, 
-                  anglePerSegment = 360/numSegments, 
+                  anglePerSegment = 360 / numSegments, 
                   randomSegment = Math.floor(Math.random() * numSegments), 
                   spins = 5 + Math.floor(Math.random() * 5), 
-                  finalRotation = (spins * 360) + (randomSegment * anglePerSegment) + (anglePerSegment/2); 
+                  finalRotation = (spins * 360) + (randomSegment * anglePerSegment) + (anglePerSegment / 2); 
             
             currentRotation += finalRotation; 
             document.getElementById('wheel').style.transform = `rotate(${currentRotation}deg)`; 
             
             setTimeout(() => { 
-                const normalizedRotation = currentRotation % 360, 
-                      winningIndex = Math.floor((360 - normalizedRotation + (anglePerSegment/2)) / anglePerSegment) % numSegments, 
+                const normalizedRotation = (360 - (currentRotation % 360)) % 360, 
+                      winningIndex = Math.floor((normalizedRotation + (anglePerSegment / 2)) / anglePerSegment) % numSegments, 
                       winningCard = tarotCards[winningIndex],
                       cardNumber = winningIndex + 1;
                 
