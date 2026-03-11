@@ -173,7 +173,7 @@
                 text.setAttribute("fill", "white");
                 text.setAttribute("font-size", "14");
                 text.setAttribute("font-weight", "bold");
-                text.textContent = i + 1;
+                text.textContent = i;
                 svg.appendChild(text);
             }
             
@@ -201,7 +201,7 @@
                 const normalizedRotation = (360 - (currentRotation % 360)) % 360;
                 const winningIndex = Math.floor((normalizedRotation + anglePerSegment / 2) / anglePerSegment) % numSegments;
                 const winningCard = tarotCards[winningIndex];
-                const cardNumber = winningIndex + 1;
+                const cardNumber = winningIndex;
                 
                 document.getElementById('result').innerHTML = `
                     <div class="label">Your card:</div>
