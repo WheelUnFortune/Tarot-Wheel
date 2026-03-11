@@ -20,29 +20,14 @@
         h1 { font-size: 2rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); color: #d4af37; }
         .subtitle { font-size: 0.9rem; color: #a0a0a0; margin-bottom: 20px; }
         .wheel-container { position: relative; width: 350px; height: 350px; }
-        .wheel { width: 100%; height: 100%; border-radius: 50%; position: relative; overflow: hidden; box-shadow: 0 0 50px rgba(212, 175, 55, 0.3); transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); }
-        .wheel-segment { 
-            position: absolute; 
-            width: 50%; 
-            height: 50%; 
-            transform-origin: 100% 100%; 
-            left: 50%; 
-            top: 0; 
-            display: flex; 
-            align-items: flex-end; 
-            justify-content: center; 
-            font-size: 14px; 
-            font-weight: bold; 
-            text-align: center; 
-            padding-bottom: 10px;
-            clip-path: polygon(0 0, 100% 0, 50% 100%);
-        }
-        .wheel-segment span { 
-            transform: rotate(0deg); 
-            display: block;
-            color: #fff;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-            margin-bottom: 5px;
+        .wheel { 
+            width: 100%; 
+            height: 100%; 
+            border-radius: 50%; 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.3); 
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); 
         }
         .center-circle { 
             position: absolute; 
@@ -139,22 +124,60 @@
             "Judgement", "The World",
             "Ace of Wands", "Ace of Cups", "Ace of Swords", "Ace of Pentacles"
         ];
-        const colors = ['#8B4513', '#A0522D', '#CD853F', '#D2691E', '#8B4513', '#A0522D', '#CD853F', '#D2691E', '#8B4513', '#A0522D', '#CD853F', '#D2691E', '#8B4513', '#A0522D'];
+        
+        const colors = ['#8B4513', '#A0522D', '#CD853F', '#D2691E'];
         let currentRotation = 0, isSpinning = false;
         
         function createWheel() { 
-            const wheel = document.getElementById('wheel'), 
-                  numSegments = tarotCards.length, 
-                  anglePerSegment = 360 / numSegments; 
+            const wheel = document.getElementById('wheel');
+            const numSegments = tarotCards.length;
+            const anglePerSegment = 360 / numSegments;
+            
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("viewBox", "0 0 350 350");
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            
+            const centerX = 175;
+            const centerY = 175;
+            const radius = 175;
             
             for (let i = 0; i < numSegments; i++) {
-                const segment = document.createElement('div'); 
-                segment.className = 'wheel-segment'; 
-                segment.style.backgroundColor = colors[i % colors.length]; 
-                segment.style.transform = `translateX(-50%) rotate(${i * anglePerSegment}deg)`; 
-                segment.innerHTML = `<span>${i + 1}</span>`; 
-                wheel.appendChild(segment); 
+                const startAngle = (i * anglePerSegment - 90) * Math.PI / 180;
+                const endAngle = ((i + 1) * anglePerSegment - 90) * Math.PI / 180;
+                
+                const x1 = centerX + radius * Math.cos(startAngle);
+                const y1 = centerY + radius * Math.sin(startAngle);
+                const x2 = centerX + radius * Math.cos(endAngle);
+                const y2 = centerY + radius * Math.sin(endAngle);
+                
+                const path = document.createElementNS(svgNS, "path");
+                const d = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`;
+                path.setAttribute("d", d);
+                path.setAttribute("fill", colors[i % colors.length]);
+                path.setAttribute("stroke", "#1a1a2e");
+                path.setAttribute("stroke-width", "1");
+                svg.appendChild(path);
+                
+                const textAngle = (i * anglePerSegment + anglePerSegment / 2 - 90) * Math.PI / 180;
+                const textRadius = radius * 0.7;
+                const textX = centerX + textRadius * Math.cos(textAngle);
+                const textY = centerY + textRadius * Math.sin(textAngle);
+                
+                const text = document.createElementNS(svgNS, "text");
+                text.setAttribute("x", textX);
+                text.setAttribute("y", textY);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("dominant-baseline", "middle");
+                text.setAttribute("fill", "white");
+                text.setAttribute("font-size", "14");
+                text.setAttribute("font-weight", "bold");
+                text.textContent = i + 1;
+                svg.appendChild(text);
             }
+            
+            wheel.appendChild(svg);
         }
         
         function spin() { 
@@ -165,30 +188,30 @@
             btn.textContent = 'SPINNING...'; 
             document.getElementById('result').innerHTML = '<div class="label">Your card:</div><div class="card-name">...</div>'; 
             
-            const numSegments = tarotCards.length, 
-                  anglePerSegment = 360 / numSegments, 
-                  randomSegment = Math.floor(Math.random() * numSegments), 
-                  spins = 5 + Math.floor(Math.random() * 5), 
-                  finalRotation = (spins * 360) + (randomSegment * anglePerSegment) + (anglePerSegment / 2); 
+            const numSegments = tarotCards.length;
+            const anglePerSegment = 360 / numSegments;
+            const randomSegment = Math.floor(Math.random() * numSegments);
+            const spins = 5 + Math.floor(Math.random() * 5);
+            const finalRotation = (spins * 360) + (randomSegment * anglePerSegment) + (anglePerSegment / 2);
             
-            currentRotation += finalRotation; 
-            document.getElementById('wheel').style.transform = `rotate(${currentRotation}deg)`; 
+            currentRotation += finalRotation;
+            document.getElementById('wheel').style.transform = `rotate(${currentRotation}deg)`;
             
-            setTimeout(() => { 
-                const normalizedRotation = (360 - (currentRotation % 360)) % 360, 
-                      winningIndex = Math.floor((normalizedRotation + (anglePerSegment / 2)) / anglePerSegment) % numSegments, 
-                      winningCard = tarotCards[winningIndex],
-                      cardNumber = winningIndex + 1;
+            setTimeout(() => {
+                const normalizedRotation = (360 - (currentRotation % 360)) % 360;
+                const winningIndex = Math.floor((normalizedRotation + anglePerSegment / 2) / anglePerSegment) % numSegments;
+                const winningCard = tarotCards[winningIndex];
+                const cardNumber = winningIndex + 1;
                 
                 document.getElementById('result').innerHTML = `
                     <div class="label">Your card:</div>
                     <div class="card-number">Card #${cardNumber}</div>
                     <div class="card-name">${winningCard}</div>
-                `; 
-                isSpinning = false; 
-                btn.disabled = false; 
-                btn.textContent = 'SPIN AGAIN'; 
-            }, 4000); 
+                `;
+                isSpinning = false;
+                btn.disabled = false;
+                btn.textContent = 'SPIN AGAIN';
+            }, 4000);
         }
         
         function createStars() { 
