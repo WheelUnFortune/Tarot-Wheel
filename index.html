@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WheelUnFortune</title>
+    <title>Wheel Up Fortune</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Georgia', serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background: radial-gradient(ellipse at top, #392047 0%, #180e24 50%, #09070e 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             color: #e8e8e8;
-            overflow: hidden;
+            overflow-x: hidden;
+            padding: 32px 16px;
         }
-        h1 { font-size: 2rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); color: #d4af37; }
-        .subtitle { font-size: 0.9rem; color: #a0a0a0; margin-bottom: 20px; }
-        .wheel-container { position: relative; width: 350px; height: 350px; }
+        h1 { font-size: 2rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); color: #ffad55; }
+        .subtitle { font-size: 0.9rem; color: #c5b1cf; margin-bottom: 20px; }
+        .wheel-container { position: relative; width: min(350px, 86vw); height: min(350px, 86vw); }
         .wheel { 
             width: 100%; 
             height: 100%; 
@@ -33,7 +34,7 @@
             position: absolute; 
             width: 60px; 
             height: 60px; 
-            background: linear-gradient(145deg, #d4af37, #b8941f); 
+            background: linear-gradient(145deg, #ffad55, #db682b); 
             border-radius: 50%; 
             top: 50%; 
             left: 50%; 
@@ -54,7 +55,7 @@
             height: 0; 
             border-left: 20px solid transparent; 
             border-right: 20px solid transparent; 
-            border-top: 40px solid #d4af37; 
+            border-top: 40px solid #ffad55; 
             z-index: 20; 
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); 
         }
@@ -63,7 +64,7 @@
             padding: 15px 50px; 
             font-size: 1.3rem; 
             font-family: 'Georgia', serif; 
-            background: linear-gradient(145deg, #d4af37, #b8941f); 
+            background: linear-gradient(145deg, #ffad55, #db682b); 
             color: #1a1a2e; 
             border: none; 
             border-radius: 50px; 
@@ -83,7 +84,7 @@
         }
         .result .label { 
             font-size: 0.9rem; 
-            color: #a0a0a0; 
+            color: #c5b1cf; 
             margin-bottom: 5px; 
         }
         .result .card-number { 
@@ -93,9 +94,17 @@
         }
         .result .card-name { 
             font-size: 2rem; 
-            color: #d4af37; 
+            color: #ffad55; 
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5); 
         }
+        .season { color: #ffad55; font-size: 1.5rem; letter-spacing: 8px; margin-bottom: 14px; }
+        .subtitle { text-align: center; max-width: 360px; line-height: 1.5; }
+        .wheel-container { margin-top: 12px; }
+        .wheel { border: 3px solid #ffad55; box-shadow: 0 0 45px #b44f2240; }
+        .result { width: min(440px, 100%); min-height: 180px; }
+        .card-meaning { font-size: 1rem; line-height: 1.6; color: #e6d6ec; margin: 12px auto 0; }
+        .spin-btn:focus-visible { outline: 3px solid #e6d6ec; outline-offset: 5px; }
+        @media (prefers-reduced-motion: reduce) { .star { animation: none !important; } }
         .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
         .star { position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; animation: twinkle 3s infinite; }
         @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
@@ -103,15 +112,16 @@
 </head>
 <body>
     <div class="stars" id="stars"></div>
-    <h1>WheelUnFortune</h1>
-    <p class="subtitle">Major Arcana + The Aces (26 Cards)</p>
+    <div class="season" aria-hidden="true">☾ &nbsp; ✦ &nbsp; 🦇 &nbsp; ✦ &nbsp; ☽</div>
+    <h1>Wheel Up Fortune</h1>
+    <p class="subtitle">A Halloween oracle · 26 cards · One little spark of magic</p>
     <div class="wheel-container">
         <div class="pointer"></div>
         <div class="wheel" id="wheel"></div>
-        <div class="center-circle">☆</div>
+        <div class="center-circle" aria-hidden="true">🎃</div>
     </div>
     <button class="spin-btn" id="spinBtn" onclick="spin()">SPIN</button>
-    <div class="result" id="result">
+    <div class="result" id="result" role="status" aria-live="polite" aria-atomic="true">
         <div class="label">Your card:</div>
         <div class="card-name">Click SPIN to reveal</div>
     </div>
@@ -125,7 +135,35 @@
             "Ace of Wands", "Ace of Cups", "Ace of Swords", "Ace of Pentacles"
         ];
         
-        const colors = ['#8B4513', '#A0522D', '#CD853F', '#D2691E'];
+        const cardMeanings = [
+            "Step into the unknown with curiosity. A fresh beginning invites you to trust yourself.",
+            "You have the tools to bring an idea to life. Focus your energy and take action.",
+            "Listen to your intuition. Quiet reflection may reveal what is beneath the surface.",
+            "Nurture yourself and what you are creating. Growth flourishes with care and patience.",
+            "Build a steady foundation. Clear boundaries and thoughtful leadership support your next step.",
+            "Seek wisdom in a teacher, tradition, or community. Consider which beliefs truly serve you.",
+            "Choose what aligns with your values. Honest connection begins with an open heart.",
+            "Move forward with purpose. Bring competing impulses together and stay focused.",
+            "Meet challenges with patience and compassion. Gentle courage is a powerful strength.",
+            "Make space for solitude. Your own inner wisdom can help light the way.",
+            "Life moves in cycles. Welcome change and stay open to unexpected opportunities.",
+            "Look honestly at your choices. Fairness, accountability, and balance guide the way.",
+            "Pause and see things from another angle. Letting go of control can bring clarity.",
+            "An ending makes room for renewal. Release what has run its course and welcome transformation.",
+            "Find a sustainable balance. Patience and moderation help different parts of life work together.",
+            "Notice what keeps you feeling stuck. Awareness is the first step toward reclaiming your freedom.",
+            "A sudden shift may challenge old foundations. Let the truth make room for something stronger.",
+            "Reconnect with hope. Give yourself time to heal and trust the possibility of renewal.",
+            "Things may feel uncertain. Listen to your dreams and feelings, while checking your assumptions.",
+            "Welcome warmth, joy, and clarity. Let yourself celebrate the good in front of you.",
+            "Reflect on what you have learned. Answer the call to grow and begin again with purpose.",
+            "A cycle is reaching completion. Celebrate your progress and the lessons you can carry forward.",
+            "A spark of inspiration is arriving. Give a new passion or creative idea room to grow.",
+            "Open your heart to connection. A new emotional or creative beginning is possible.",
+            "A fresh insight can cut through confusion. Seek truth and communicate clearly.",
+            "A practical opportunity is taking root. Small, steady steps can build something lasting."
+        ];
+        const colors = ['#713b87', '#b44f22', '#382347', '#783319'];
         let currentRotation = 0, isSpinning = false;
         
         function createWheel() { 
@@ -199,7 +237,7 @@
             
             setTimeout(() => {
                 const normalizedRotation = (360 - (currentRotation % 360)) % 360;
-                const winningIndex = Math.floor((normalizedRotation + anglePerSegment / 2) / anglePerSegment) % numSegments;
+                const winningIndex = Math.floor(normalizedRotation / anglePerSegment) % numSegments;
                 const winningCard = tarotCards[winningIndex];
                 const cardNumber = winningIndex;
                 
@@ -207,6 +245,7 @@
                     <div class="label">Your card:</div>
                     <div class="card-number">Card #${cardNumber}</div>
                     <div class="card-name">${winningCard}</div>
+                    <p class="card-meaning">${cardMeanings[winningIndex]}</p>
                 `;
                 isSpinning = false;
                 btn.disabled = false;
